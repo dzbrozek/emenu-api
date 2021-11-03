@@ -10,6 +10,7 @@ class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = ('id', 'name', 'description', 'created', 'updated')
+        read_only_fields = ('created', 'updated')
 
     def update(self, instance: Menu, validated_data: dict) -> Menu:
         data = {**validated_data, 'updated': timezone.now()}
@@ -20,6 +21,7 @@ class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
         fields = ('id', 'name', 'description', 'price', 'time_to_prepare', 'is_vegetarian', 'created', 'updated')
+        read_only_fields = ('created', 'updated')
 
     @transaction.atomic
     def create(self, validated_data: dict) -> Dish:
