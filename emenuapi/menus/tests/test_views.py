@@ -1,9 +1,12 @@
+import datetime
+
+import pytz
 from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 from menus.factories import DishFactory, MenuFactory, UserFactory
 from menus.models import Dish, Menu
-from menus.serializers import DishSerializer, MenuSerializer
+from menus.serializers import DishSerializer, MenuDetailsSerializer, MenuSerializer
 from rest_framework.test import APITestCase
 
 
@@ -30,22 +33,29 @@ class CreateMenuTest(APITestCase):
 
 class RetrieveMenuTest(APITestCase):
     def setUp(self):
-        self.menu = MenuFactory()
+        self.first_menu, self.second_menu = MenuFactory.create_batch(2)
+        DishFactory(menu=self.first_menu)
 
-    def test_unauthenticated_user_cannot_retrieve_menu(self):
-        response = self.client.get(reverse('menus:menu-detail', kwargs=dict(menu_id=self.menu.pk)))
+    def test_unauthenticated_user_cannot_retrieve_empty_menu(self):
+        response = self.client.get(reverse('menus:menu-detail', kwargs=dict(menu_id=self.second_menu.pk)))
 
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {'detail': 'Not found.'})
+
+    def test_unauthenticated_user_can_retrieve_non_empty_menu(self):
+        response = self.client.get(reverse('menus:menu-detail', kwargs=dict(menu_id=self.first_menu.pk)))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), MenuDetailsSerializer(self.first_menu).data)
 
     def test_authenticated_user_can_retrieve_menu(self):
         user = UserFactory()
         self.client.force_authenticate(user)
 
-        response = self.client.get(reverse('menus:menu-detail', kwargs=dict(menu_id=self.menu.pk)))
+        response = self.client.get(reverse('menus:menu-detail', kwargs=dict(menu_id=self.second_menu.pk)))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), MenuSerializer(self.menu).data)
+        self.assertEqual(response.json(), MenuDetailsSerializer(self.second_menu).data)
 
 
 class UpdateMenuTest(APITestCase):
@@ -94,13 +104,29 @@ class DestroyMenuTest(APITestCase):
 
 class ListMenuTest(APITestCase):
     def setUp(self):
-        self.first_menu, self.second_menu = MenuFactory.create_batch(2)
+        self.first_menu = MenuFactory(
+            name='First menu for breakfast',
+            created=datetime.datetime(2021, 5, 1, 12, 13, tzinfo=pytz.UTC),
+            updated=datetime.datetime(2021, 6, 1, 12, 13, tzinfo=pytz.UTC),
+        )
+        self.second_menu = MenuFactory(
+            name='Second menu for lunch',
+            created=datetime.datetime(2021, 5, 5, 6, 30, tzinfo=pytz.UTC),
+            updated=datetime.datetime(2021, 6, 5, 6, 30, tzinfo=pytz.UTC),
+        )
+        self.third_menu = MenuFactory(
+            name='Third menu for dinner',
+            created=datetime.datetime(2021, 5, 15, 16, 16, tzinfo=pytz.UTC),
+            updated=datetime.datetime(2021, 6, 15, 16, 16, tzinfo=pytz.UTC),
+        )
+        DishFactory.create_batch(2, menu=self.first_menu)
+        DishFactory(menu=self.second_menu)
 
-    def test_unauthenticated_user_cannot_list_menu(self):
+    def test_unauthenticated_user_cannot_list_non_empty_menus(self):
         response = self.client.get(reverse('menus:menu-list'))
 
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), MenuSerializer([self.second_menu, self.first_menu], many=True).data)
 
     def test_authenticated_user_can_list_menu(self):
         user = UserFactory()
@@ -109,7 +135,54 @@ class ListMenuTest(APITestCase):
         response = self.client.get(reverse('menus:menu-list'))
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(), MenuSerializer([self.third_menu, self.second_menu, self.first_menu], many=True).data
+        )
+
+    def test_sort_list_by_name(self):
+        response = self.client.get(f"{reverse('menus:menu-list')}?ordering=-name")
+
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), MenuSerializer([self.second_menu, self.first_menu], many=True).data)
+
+        response = self.client.get(f"{reverse('menus:menu-list')}?ordering=name")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), MenuSerializer([self.first_menu, self.second_menu], many=True).data)
+
+    def test_sort_list_by_num_dishes(self):
+        response = self.client.get(f"{reverse('menus:menu-list')}?ordering=-num_dishes")
+
+        self.assertEqual(response.json(), MenuSerializer([self.first_menu, self.second_menu], many=True).data)
+
+        response = self.client.get(f"{reverse('menus:menu-list')}?ordering=num_dishes")
+
+        self.assertEqual(response.json(), MenuSerializer([self.second_menu, self.first_menu], many=True).data)
+
+    def test_filter_list_by_name(self):
+        response = self.client.get(f"{reverse('menus:menu-list')}?search=lunch")
+
+        self.assertEqual(response.json(), MenuSerializer([self.second_menu], many=True).data)
+
+    def test_filter_list_by_created(self):
+        after = datetime.datetime(2021, 5, 5, tzinfo=pytz.UTC)
+        before = datetime.datetime(2021, 5, 10, tzinfo=pytz.UTC)
+
+        response = self.client.get(
+            f"{reverse('menus:menu-list')}?created_after={after.isoformat().replace('+00:00', '')}&created_before={before.isoformat().replace('+00:00', '')}"
+        )
+
+        self.assertEqual(response.json(), MenuSerializer([self.second_menu], many=True).data)
+
+    def test_filter_list_by_updated(self):
+        after = datetime.datetime(2021, 5, 30, tzinfo=pytz.UTC)
+        before = datetime.datetime(2021, 6, 2, tzinfo=pytz.UTC)
+
+        response = self.client.get(
+            f"{reverse('menus:menu-list')}?updated_after={after.isoformat().replace('+00:00', '')}&updated_before={before.isoformat().replace('+00:00', '')}"
+        )
+
+        self.assertEqual(response.json(), MenuSerializer([self.first_menu], many=True).data)
 
 
 class CreateDishTest(APITestCase):

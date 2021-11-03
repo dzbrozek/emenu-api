@@ -6,17 +6,6 @@ from menus.models import Dish, Menu
 from rest_framework import serializers
 
 
-class MenuSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Menu
-        fields = ('id', 'name', 'description', 'created', 'updated')
-        read_only_fields = ('created', 'updated')
-
-    def update(self, instance: Menu, validated_data: dict) -> Menu:
-        data = {**validated_data, 'updated': timezone.now()}
-        return cast(Menu, super().update(instance, data))
-
-
 class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
@@ -36,3 +25,22 @@ class DishSerializer(serializers.ModelSerializer):
         dish = super().update(instance, data)
         self.context['menu'].update_last_updated()
         return cast(Dish, dish)
+
+
+class MenuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Menu
+        fields = ('id', 'name', 'description', 'created', 'updated')
+        read_only_fields = ('created', 'updated')
+
+    def update(self, instance: Menu, validated_data: dict) -> Menu:
+        data = {**validated_data, 'updated': timezone.now()}
+        return cast(Menu, super().update(instance, data))
+
+
+class MenuDetailsSerializer(serializers.ModelSerializer):
+    dishes = DishSerializer(many=True)
+
+    class Meta:
+        model = Menu
+        fields = ('id', 'name', 'description', 'dishes', 'created', 'updated')
