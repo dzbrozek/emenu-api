@@ -22,11 +22,6 @@ class DishSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('created', 'updated', 'image')
 
-    def create(self, validated_data: dict) -> Dish:
-        data = {**validated_data}
-        dish = super().create(data)
-        return cast(Dish, dish)
-
     def update(self, instance: Dish, validated_data: dict) -> Dish:
         data = {**validated_data, 'updated': timezone.now()}
         dish = super().update(instance, data)
