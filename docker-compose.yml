@@ -10,7 +10,7 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
 
-  backend:
+  backend: &backend
     restart: always
     command: start-backend
     image: emenu-api
@@ -29,6 +29,22 @@ services:
     logging:
       options:
         max-size: "200k"
+
+  rabbitmq:
+    restart: always
+    image: rabbitmq:3.8.6
+    expose:
+      - "5672"
+
+  worker:
+    <<: *backend
+    ports: [ ]
+    command: start-celery worker -l INFO -Q default
+
+  beat:
+    <<: *backend
+    ports: [ ]
+    command: start-celery beat -l INFO
 
 volumes:
   pg-data:

@@ -1,0 +1,15 @@
+Daily dish report
+
+{% if new_dishes %}
+New dishes:
+{% for dish in new_dishes %}
+* {{ dish.name }}
+{% endfor %}
+{% endif %}
+
+{% if updated_dishes %}
+Updated dishes:
+{% for dish in updated_dishes %}
+* {{ dish.name }}
+{% endfor %}
+{% endif %}

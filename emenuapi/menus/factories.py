@@ -45,3 +45,12 @@ class DishFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Dish
+
+    @factory.post_generation
+    def created(self, create: bool, created: datetime.datetime, **kwargs: dict) -> None:
+        if not create:
+            return
+
+        if created:
+            self.created = created
+            self.save()
