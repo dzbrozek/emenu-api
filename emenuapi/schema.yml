@@ -1,0 +1,631 @@
+openapi: 3.0.3
+info:
+  title: eMenu API
+  version: 1.0.0
+paths:
+  /api/auth/:
+    post:
+      operationId: auth_create
+      description: Obtains auth token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
+  /api/menus/:
+    get:
+      operationId: menus_list
+      description: Returns list of menus
+      tags:
+      - menus
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Menu'
+          description: ''
+    post:
+      operationId: menus_create
+      description: Creates a new menu
+      tags:
+      - menus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Menu'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Menu'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Menu'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+          description: ''
+  /api/menus/{menu_id}/:
+    get:
+      operationId: menus_retrieve
+      description: Retrieves a menu
+      parameters:
+      - in: path
+        name: menu_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this menu.
+        required: true
+      tags:
+      - menus
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+          description: ''
+    put:
+      operationId: menus_update
+      description: Updates a menu
+      parameters:
+      - in: path
+        name: menu_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this menu.
+        required: true
+      tags:
+      - menus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Menu'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Menu'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Menu'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+          description: ''
+    patch:
+      operationId: menus_partial_update
+      description: Partially updates a menu
+      parameters:
+      - in: path
+        name: menu_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this menu.
+        required: true
+      tags:
+      - menus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMenu'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMenu'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMenu'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+          description: ''
+    delete:
+      operationId: menus_destroy
+      description: Deletes a menu
+      parameters:
+      - in: path
+        name: menu_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this menu.
+        required: true
+      tags:
+      - menus
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/menus/{menu_menu_id}/dishes/:
+    get:
+      operationId: menus_dishes_list
+      description: Returns list of menu's dishes
+      parameters:
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+          description: ''
+    post:
+      operationId: menus_dishes_create
+      description: Creates a new dish in a menu
+      parameters:
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Dish'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+  /api/menus/{menu_menu_id}/dishes/{dish_id}/:
+    get:
+      operationId: menus_dishes_retrieve
+      description: Retrieves a dish from a menu
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+    put:
+      operationId: menus_dishes_update
+      description: Updates a dish in a menu
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Dish'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+    patch:
+      operationId: menus_dishes_partial_update
+      description: Partially updates a dish in a menu
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDish'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDish'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDish'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+    delete:
+      operationId: menus_dishes_destroy
+      description: Deletes a dish from a menu
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    AuthToken:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        token:
+          type: string
+          readOnly: true
+      required:
+      - password
+      - token
+      - username
+    Dish:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        price:
+          type: string
+          format: decimal
+          pattern: ^\d{0,4}(?:\.\d{0,2})?$
+        time_to_prepare:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Time in minutes
+        is_vegetarian:
+          type: boolean
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - created
+      - description
+      - id
+      - is_vegetarian
+      - name
+      - price
+      - time_to_prepare
+    Menu:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - created
+      - description
+      - id
+      - name
+    PatchedDish:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        price:
+          type: string
+          format: decimal
+          pattern: ^\d{0,4}(?:\.\d{0,2})?$
+        time_to_prepare:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Time in minutes
+        is_vegetarian:
+          type: boolean
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+    PatchedMenu:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+  securitySchemes:
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
