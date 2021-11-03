@@ -16,6 +16,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from typing import List
 
+from .settings_celery import *
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -143,3 +145,6 @@ SPECTACULAR_SETTINGS = {
 CORS_URLS_REGEX = r'^/api/.*$'
 
 SHELL_PLUS = "ipython"
+
+FROM_EMAIL = os.environ.get("FROM_EMAIL")
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")

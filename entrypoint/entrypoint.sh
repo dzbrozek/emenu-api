@@ -10,6 +10,9 @@ case $1 in
     start-backend)
         exec /app/entrypoint/start-backend.sh "${@:2}"
         ;;
+    start-celery)
+        exec /app/entrypoint/start-celery.sh "${@:2}"
+        ;;
     *)
         exec "$@"
         ;;
