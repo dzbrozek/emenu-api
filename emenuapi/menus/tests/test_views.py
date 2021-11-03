@@ -345,7 +345,7 @@ class UploadDishPhotoTest(APITestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
 
-    def test_authenticated_user_can_update_dish(self):
+    def test_authenticated_user_can_upload_photo(self):
         user = UserFactory()
         self.client.force_authenticate(user)
 

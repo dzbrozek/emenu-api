@@ -98,6 +98,7 @@ class DishModelViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = DishSerializer
     lookup_url_kwarg = 'dish_id'
+    queryset = Dish.objects.none()
 
     @cached_property
     def menu(self) -> Menu:
@@ -155,6 +156,10 @@ class DishModelViewSet(ModelViewSet):
 
     @extend_schema(
         description='Uploads a dish photo',
+        operation_id='upload_file',
+        request={
+            'multipart/form-data': {'type': 'object', 'properties': {'file': {'type': 'string', 'format': 'binary'}}}
+        },
     )
     @transaction.atomic()
     @action(detail=True, methods=['post'])

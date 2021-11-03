@@ -276,7 +276,8 @@ paths:
       - in: path
         name: dish_id
         schema:
-          type: string
+          type: integer
+        description: A unique integer value identifying this dish.
         required: true
       - in: path
         name: menu_menu_id
@@ -301,7 +302,8 @@ paths:
       - in: path
         name: dish_id
         schema:
-          type: string
+          type: integer
+        description: A unique integer value identifying this dish.
         required: true
       - in: path
         name: menu_menu_id
@@ -338,7 +340,8 @@ paths:
       - in: path
         name: dish_id
         schema:
-          type: string
+          type: integer
+        description: A unique integer value identifying this dish.
         required: true
       - in: path
         name: menu_menu_id
@@ -374,7 +377,8 @@ paths:
       - in: path
         name: dish_id
         schema:
-          type: string
+          type: integer
+        description: A unique integer value identifying this dish.
         required: true
       - in: path
         name: menu_menu_id
@@ -388,6 +392,42 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/menus/{menu_menu_id}/dishes/{dish_id}/photo/:
+    post:
+      operationId: upload_file
+      description: Uploads a dish photo
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dish.
+        required: true
+      - in: path
+        name: menu_menu_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - menus
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
   /api/schema/:
     get:
       operationId: schema_retrieve
@@ -570,6 +610,10 @@ components:
           description: Time in minutes
         is_vegetarian:
           type: boolean
+        image:
+          type: string
+          format: uri
+          readOnly: true
         created:
           type: string
           format: date-time
@@ -582,6 +626,7 @@ components:
       - created
       - description
       - id
+      - image
       - is_vegetarian
       - name
       - price
@@ -663,6 +708,10 @@ components:
           description: Time in minutes
         is_vegetarian:
           type: boolean
+        image:
+          type: string
+          format: uri
+          readOnly: true
         created:
           type: string
           format: date-time
