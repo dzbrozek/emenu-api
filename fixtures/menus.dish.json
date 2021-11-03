@@ -3,7 +3,6 @@
     "model": "menus.dish",
     "pk": 1,
     "fields": {
-        "menu": 1,
         "name": "Test dish",
         "description": "Test dish description",
         "price": "24.99",
@@ -17,7 +16,6 @@
     "model": "menus.dish",
     "pk": 3,
     "fields": {
-        "menu": 1,
         "name": "Second dish",
         "description": "Second dish description",
         "price": "15.00",

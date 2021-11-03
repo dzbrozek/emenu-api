@@ -30,6 +30,184 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthToken'
           description: ''
+  /api/dishes/:
+    get:
+      operationId: dishes_list
+      description: Returns list of dishes
+      tags:
+      - dishes
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+          description: ''
+    post:
+      operationId: dishes_create
+      description: Creates a new dish
+      tags:
+      - dishes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Dish'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+  /api/dishes/{dish_id}/:
+    get:
+      operationId: dishes_retrieve
+      description: Retrieves a dish
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dish.
+        required: true
+      tags:
+      - dishes
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+    put:
+      operationId: dishes_update
+      description: Updates a dish
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dish.
+        required: true
+      tags:
+      - dishes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Dish'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+    patch:
+      operationId: dishes_partial_update
+      description: Partially updates a dish
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dish.
+        required: true
+      tags:
+      - dishes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDish'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDish'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDish'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+    delete:
+      operationId: dishes_destroy
+      description: Deletes a dish
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dish.
+        required: true
+      tags:
+      - dishes
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/dishes/{dish_id}/photo/:
+    post:
+      operationId: upload_file
+      description: Uploads a dish photo
+      parameters:
+      - in: path
+        name: dish_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dish.
+        required: true
+      tags:
+      - dishes
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
   /api/menus/:
     get:
       operationId: menus_list
@@ -213,221 +391,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/menus/{menu_menu_id}/dishes/:
-    get:
-      operationId: menus_dishes_list
-      description: Returns list of menu's dishes
-      parameters:
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Dish'
-          description: ''
-    post:
-      operationId: menus_dishes_create
-      description: Creates a new dish in a menu
-      parameters:
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Dish'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Dish'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Dish'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dish'
-          description: ''
-  /api/menus/{menu_menu_id}/dishes/{dish_id}/:
-    get:
-      operationId: menus_dishes_retrieve
-      description: Retrieves a dish from a menu
-      parameters:
-      - in: path
-        name: dish_id
-        schema:
-          type: integer
-        description: A unique integer value identifying this dish.
-        required: true
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dish'
-          description: ''
-    put:
-      operationId: menus_dishes_update
-      description: Updates a dish in a menu
-      parameters:
-      - in: path
-        name: dish_id
-        schema:
-          type: integer
-        description: A unique integer value identifying this dish.
-        required: true
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Dish'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Dish'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Dish'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dish'
-          description: ''
-    patch:
-      operationId: menus_dishes_partial_update
-      description: Partially updates a dish in a menu
-      parameters:
-      - in: path
-        name: dish_id
-        schema:
-          type: integer
-        description: A unique integer value identifying this dish.
-        required: true
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedDish'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedDish'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedDish'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dish'
-          description: ''
-    delete:
-      operationId: menus_dishes_destroy
-      description: Deletes a dish from a menu
-      parameters:
-      - in: path
-        name: dish_id
-        schema:
-          type: integer
-        description: A unique integer value identifying this dish.
-        required: true
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      security:
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/menus/{menu_menu_id}/dishes/{dish_id}/photo/:
-    post:
-      operationId: upload_file
-      description: Uploads a dish photo
-      parameters:
-      - in: path
-        name: dish_id
-        schema:
-          type: integer
-        description: A unique integer value identifying this dish.
-        required: true
-      - in: path
-        name: menu_menu_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - menus
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dish'
-          description: ''
   /api/schema/:
     get:
       operationId: schema_retrieve
@@ -643,6 +606,10 @@ components:
           maxLength: 255
         description:
           type: string
+        dishes:
+          type: array
+          items:
+            type: integer
         created:
           type: string
           format: date-time
@@ -654,6 +621,7 @@ components:
       required:
       - created
       - description
+      - dishes
       - id
       - name
       - updated
@@ -731,6 +699,10 @@ components:
           maxLength: 255
         description:
           type: string
+        dishes:
+          type: array
+          items:
+            type: integer
         created:
           type: string
           format: date-time

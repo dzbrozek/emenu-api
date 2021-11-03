@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 import factory.fuzzy
 from django.contrib.auth.models import User
@@ -26,6 +27,15 @@ class MenuFactory(factory.django.DjangoModelFactory):
         model = Menu
 
     @factory.post_generation
+    def dishes(self, create: bool, extracted: List[Dish], **kwargs: dict) -> None:
+        if not create:
+            return
+
+        if extracted:
+            for dish in extracted:
+                self.dishes.add(dish)
+
+    @factory.post_generation
     def created(self, create: bool, created: datetime.datetime, **kwargs: dict) -> None:
         if not create:
             return
@@ -36,7 +46,6 @@ class MenuFactory(factory.django.DjangoModelFactory):
 
 
 class DishFactory(factory.django.DjangoModelFactory):
-    menu = factory.SubFactory(MenuFactory)
     name = factory.fuzzy.FuzzyText()
     description = factory.fuzzy.FuzzyText()
     price = factory.fuzzy.FuzzyDecimal(low=0.01, high=100)

@@ -2,7 +2,6 @@ from typing import cast
 
 from django.db import models, transaction
 from django.utils import timezone
-from django.utils.functional import cached_property
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -100,56 +99,41 @@ class DishModelViewSet(ModelViewSet):
     lookup_url_kwarg = 'dish_id'
     queryset = Dish.objects.none()
 
-    @cached_property
-    def menu(self) -> Menu:
-        return cast(Menu, Menu.objects.get(pk=self.kwargs['menu_menu_id']))
-
-    def get_serializer_context(self) -> dict:
-        context = super().get_serializer_context()
-        context['menu'] = self.menu
-
-        return context
-
     def get_queryset(self) -> models.QuerySet[Dish]:
-        return Dish.objects.filter(menu_id=self.kwargs['menu_menu_id']).order_by('-created')
-
-    @transaction.atomic
-    def perform_destroy(self, instance: Dish) -> None:
-        super().perform_destroy(instance)
-        self.menu.update_last_updated()
+        return Dish.objects.all().order_by('-created')
 
     @extend_schema(
-        description='Returns list of menu\'s dishes',
+        description='Returns list of dishes',
     )
     def list(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().list(request, *args, *kwargs)
 
     @extend_schema(
-        description='Creates a new dish in a menu',
+        description='Creates a new dish',
     )
     def create(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().create(request, *args, *kwargs)
 
     @extend_schema(
-        description='Retrieves a dish from a menu',
+        description='Retrieves a dish',
     )
     def retrieve(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().retrieve(request, *args, *kwargs)
 
     @extend_schema(
-        description='Updates a dish in a menu',
+        description='Updates a dish',
     )
     def update(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().update(request, *args, *kwargs)
 
     @extend_schema(
-        description='Partially updates a dish in a menu',
+        description='Partially updates a dish',
     )
     def partial_update(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().partial_update(request, *args, *kwargs)
 
     @extend_schema(
-        description='Deletes a dish from a menu',
+        description='Deletes a dish',
     )
     def destroy(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().destroy(request, *args, *kwargs)
@@ -170,7 +154,6 @@ class DishModelViewSet(ModelViewSet):
             dish.image = image
             dish.updated = timezone.now()
             dish.save()
-            dish.menu.update_last_updated()
         except KeyError:
             raise ParseError('Request has no resource file attached')
 
