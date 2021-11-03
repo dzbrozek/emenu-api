@@ -7,13 +7,13 @@ class MenuAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'description', 'created', 'updated')
     search_fields = ('id', 'name', 'description')
     list_filter = ('created', 'updated')
+    raw_id_fields = ('dishes',)
 
 
 @admin.register(Dish)
 class DishAdmin(admin.ModelAdmin):
     list_display = (
         'id',
-        'menu',
         'name',
         'description',
         'price',
@@ -24,4 +24,3 @@ class DishAdmin(admin.ModelAdmin):
     )
     search_fields = ('id', 'name', 'description')
     list_filter = ('is_vegetarian', 'created', 'updated')
-    raw_id_fields = ('menu',)

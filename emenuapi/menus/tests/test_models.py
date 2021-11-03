@@ -6,8 +6,7 @@ from menus.models import Menu
 class MenuTest(TestCase):
     def test_with_num_dishes(self):
         first_menu, second_menu = MenuFactory.create_batch(2)
-
-        DishFactory.create_batch(2, menu=first_menu)
+        first_menu.dishes.add(*DishFactory.create_batch(2))
 
         qs = Menu.objects.all().with_num_dishes()
 

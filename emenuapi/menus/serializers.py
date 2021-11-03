@@ -1,9 +1,9 @@
 from typing import cast
 
-from django.db import transaction
 from django.utils import timezone
 from menus.models import Dish, Menu
 from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
 
 
 class DishSerializer(serializers.ModelSerializer):
@@ -22,25 +22,23 @@ class DishSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('created', 'updated', 'image')
 
-    @transaction.atomic
     def create(self, validated_data: dict) -> Dish:
-        data = {**validated_data, 'menu': self.context['menu']}
+        data = {**validated_data}
         dish = super().create(data)
-        self.context['menu'].update_last_updated()
         return cast(Dish, dish)
 
-    @transaction.atomic
     def update(self, instance: Dish, validated_data: dict) -> Dish:
         data = {**validated_data, 'updated': timezone.now()}
         dish = super().update(instance, data)
-        self.context['menu'].update_last_updated()
         return cast(Dish, dish)
 
 
 class MenuSerializer(serializers.ModelSerializer):
+    dishes = PrimaryKeyRelatedField(queryset=Dish.objects.all(), many=True)
+
     class Meta:
         model = Menu
-        fields = ('id', 'name', 'description', 'created', 'updated')
+        fields = ('id', 'name', 'description', 'dishes', 'created', 'updated')
         read_only_fields = ('created', 'updated')
 
     def update(self, instance: Menu, validated_data: dict) -> Menu:

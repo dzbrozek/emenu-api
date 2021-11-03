@@ -18,6 +18,5 @@ types-requests==2.25.9
 types-freezegun==1.1.0
 drf-spectacular==0.20.1
 django-filter==21.1
-drf-nested-routers==0.93.4
 celery==5.1.2
 Pillow==8.4.0

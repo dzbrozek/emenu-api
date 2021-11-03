@@ -6,7 +6,8 @@
         "name": "Breakfast menu",
         "description": "Breakfast menu description",
         "created": "2021-11-03T12:47:41.701Z",
-        "updated": "2021-11-03T13:55:49.164Z"
+        "updated": "2021-11-03T13:55:49.164Z",
+        "dishes": [1, 3]
     }
 },
 {

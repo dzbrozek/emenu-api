@@ -35,7 +35,7 @@ class CreateMenuTest(APITestCase):
 class RetrieveMenuTest(APITestCase):
     def setUp(self):
         self.first_menu, self.second_menu = MenuFactory.create_batch(2)
-        DishFactory(menu=self.first_menu)
+        self.first_menu.dishes.add(DishFactory())
 
     def test_unauthenticated_user_cannot_retrieve_empty_menu(self):
         response = self.client.get(reverse('menus:menu-detail', kwargs=dict(menu_id=self.second_menu.pk)))
@@ -120,8 +120,8 @@ class ListMenuTest(APITestCase):
             created=datetime.datetime(2021, 5, 15, 16, 16, tzinfo=pytz.UTC),
             updated=datetime.datetime(2021, 6, 15, 16, 16, tzinfo=pytz.UTC),
         )
-        DishFactory.create_batch(2, menu=self.first_menu)
-        DishFactory(menu=self.second_menu)
+        self.first_menu.dishes.add(*DishFactory.create_batch(2))
+        self.second_menu.dishes.add(DishFactory())
 
     def test_unauthenticated_user_can_list_non_empty_menus(self):
         response = self.client.get(reverse('menus:menu-list'))
@@ -188,7 +188,6 @@ class ListMenuTest(APITestCase):
 
 class CreateDishTest(APITestCase):
     def setUp(self):
-        self.menu = MenuFactory()
         self.data = {
             'name': 'Test dish',
             'description': 'Test dish description',
@@ -198,7 +197,7 @@ class CreateDishTest(APITestCase):
         }
 
     def test_unauthenticated_user_cannot_create_dish(self):
-        response = self.client.post(reverse('menus:dish-list', kwargs=dict(menu_menu_id=self.menu.pk)), data=self.data)
+        response = self.client.post(reverse('menus:dish-list'), data=self.data)
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
@@ -207,9 +206,9 @@ class CreateDishTest(APITestCase):
         user = UserFactory()
         self.client.force_authenticate(user)
 
-        response = self.client.post(reverse('menus:dish-list', kwargs=dict(menu_menu_id=self.menu.pk)), data=self.data)
+        response = self.client.post(reverse('menus:dish-list'), data=self.data)
 
-        dish = Dish.objects.get(menu=self.menu)
+        dish = Dish.objects.get()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), DishSerializer(dish).data)
 
@@ -219,9 +218,7 @@ class RetrieveDishTest(APITestCase):
         self.dish = DishFactory()
 
     def test_unauthenticated_user_cannot_retrieve_dish(self):
-        response = self.client.get(
-            reverse('menus:dish-detail', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk))
-        )
+        response = self.client.get(reverse('menus:dish-detail', kwargs=dict(dish_id=self.dish.pk)))
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
@@ -230,9 +227,7 @@ class RetrieveDishTest(APITestCase):
         user = UserFactory()
         self.client.force_authenticate(user)
 
-        response = self.client.get(
-            reverse('menus:dish-detail', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk))
-        )
+        response = self.client.get(reverse('menus:dish-detail', kwargs=dict(dish_id=self.dish.pk)))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), DishSerializer(self.dish).data)
@@ -251,7 +246,7 @@ class UpdateDishTest(APITestCase):
 
     def test_unauthenticated_user_cannot_update_dish(self):
         response = self.client.put(
-            reverse('menus:dish-detail', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            reverse('menus:dish-detail', kwargs=dict(dish_id=self.dish.pk)),
             data=self.data,
         )
 
@@ -263,7 +258,7 @@ class UpdateDishTest(APITestCase):
         self.client.force_authenticate(user)
 
         response = self.client.put(
-            reverse('menus:dish-detail', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            reverse('menus:dish-detail', kwargs=dict(dish_id=self.dish.pk)),
             data=self.data,
         )
 
@@ -274,12 +269,11 @@ class UpdateDishTest(APITestCase):
 
 class DestroyDishTest(APITestCase):
     def setUp(self):
-        self.menu = MenuFactory()
-        self.dish = DishFactory(menu=self.menu)
+        self.dish = DishFactory()
 
     def test_unauthenticated_user_cannot_delete_dish(self):
         response = self.client.delete(
-            reverse('menus:dish-detail', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            reverse('menus:dish-detail', kwargs=dict(dish_id=self.dish.pk)),
         )
 
         self.assertEqual(response.status_code, 401)
@@ -291,7 +285,7 @@ class DestroyDishTest(APITestCase):
         self.client.force_authenticate(user)
 
         response = self.client.delete(
-            reverse('menus:dish-detail', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            reverse('menus:dish-detail', kwargs=dict(dish_id=self.dish.pk)),
         )
 
         self.assertEqual(response.status_code, 204)
@@ -299,19 +293,14 @@ class DestroyDishTest(APITestCase):
         with self.assertRaises(Dish.DoesNotExist):
             self.dish.refresh_from_db()
 
-        self.menu.refresh_from_db()
-        self.assertEqual(self.menu.updated, timezone.now())
-
 
 class ListDishTest(APITestCase):
     def setUp(self):
-        self.menu = MenuFactory()
-        self.first_dish, self.second_dish = DishFactory.create_batch(2, menu=self.menu)
-        DishFactory()
+        self.first_dish, self.second_dish = DishFactory.create_batch(2)
 
     def test_unauthenticated_user_cannot_list_dishes(self):
         response = self.client.get(
-            reverse('menus:dish-list', kwargs=dict(menu_menu_id=self.menu.pk)),
+            reverse('menus:dish-list'),
         )
 
         self.assertEqual(response.status_code, 401)
@@ -322,7 +311,7 @@ class ListDishTest(APITestCase):
         self.client.force_authenticate(user)
 
         response = self.client.get(
-            reverse('menus:dish-list', kwargs=dict(menu_menu_id=self.menu.pk)),
+            reverse('menus:dish-list'),
         )
 
         self.assertEqual(response.status_code, 200)
@@ -338,7 +327,7 @@ class UploadDishPhotoTest(APITestCase):
 
     def test_unauthenticated_user_cannot_upload_photo(self):
         response = self.client.post(
-            reverse('menus:dish-photo', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            reverse('menus:dish-photo', kwargs=dict(dish_id=self.dish.pk)),
             data=self.data,
         )
 
@@ -350,7 +339,7 @@ class UploadDishPhotoTest(APITestCase):
         self.client.force_authenticate(user)
 
         response = self.client.post(
-            reverse('menus:dish-photo', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            reverse('menus:dish-photo', kwargs=dict(dish_id=self.dish.pk)),
             data=self.data,
         )
 
@@ -360,4 +349,3 @@ class UploadDishPhotoTest(APITestCase):
 
         self.assertTrue(self.dish.image.name)
         self.assertEqual(self.dish.updated, timezone.now())
-        self.assertEqual(self.dish.menu.updated, timezone.now())
