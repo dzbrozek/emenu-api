@@ -1,0 +1,30 @@
+[
+{
+    "model": "menus.dish",
+    "pk": 1,
+    "fields": {
+        "menu": 1,
+        "name": "Test dish",
+        "description": "Test dish description",
+        "price": "24.99",
+        "time_to_prepare": 30,
+        "is_vegetarian": false,
+        "created": "2021-11-03T13:53:29.199Z",
+        "updated": null
+    }
+},
+{
+    "model": "menus.dish",
+    "pk": 3,
+    "fields": {
+        "menu": 1,
+        "name": "Second dish",
+        "description": "Second dish description",
+        "price": "15.00",
+        "time_to_prepare": 15,
+        "is_vegetarian": true,
+        "created": "2021-11-03T13:55:49.161Z",
+        "updated": null
+    }
+}
+]

@@ -1,0 +1,22 @@
+[
+{
+    "model": "menus.menu",
+    "pk": 1,
+    "fields": {
+        "name": "Breakfast menu",
+        "description": "Breakfast menu description",
+        "created": "2021-11-03T12:47:41.701Z",
+        "updated": "2021-11-03T13:55:49.164Z"
+    }
+},
+{
+    "model": "menus.menu",
+    "pk": 2,
+    "fields": {
+        "name": "Dinner menu",
+        "description": "Dinner menu description",
+        "created": "2021-11-03T13:56:04.834Z",
+        "updated": null
+    }
+}
+]

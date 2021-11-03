@@ -1,7 +1,7 @@
 Local development
 ============
 
-We run `pre-commit` to preserve the quality of the code. To set up `pre-commit` run:
+We use `pre-commit` to preserve the quality of the code. To set up `pre-commit` run:
 
 ```
 python3.9 -m venv .venv
