@@ -1,6 +1,7 @@
 import datetime
 
 import pytz
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
@@ -326,3 +327,37 @@ class ListDishTest(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), DishSerializer([self.second_dish, self.first_dish], many=True).data)
+
+
+@freeze_time("2021-10-3")
+class UploadDishPhotoTest(APITestCase):
+    def setUp(self):
+        self.dish = DishFactory(image='')
+        image = SimpleUploadedFile("image.png", b"image_content", content_type="image/png")
+        self.data = {'file': image}
+
+    def test_unauthenticated_user_cannot_upload_photo(self):
+        response = self.client.post(
+            reverse('menus:dish-photo', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            data=self.data,
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
+
+    def test_authenticated_user_can_upload_photo(self):
+        user = UserFactory()
+        self.client.force_authenticate(user)
+
+        response = self.client.post(
+            reverse('menus:dish-photo', kwargs=dict(menu_menu_id=self.dish.menu_id, dish_id=self.dish.pk)),
+            data=self.data,
+        )
+
+        self.dish.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), DishSerializer(self.dish).data)
+
+        self.assertTrue(self.dish.image.name)
+        self.assertEqual(self.dish.updated, timezone.now())
+        self.assertEqual(self.dish.menu.updated, timezone.now())

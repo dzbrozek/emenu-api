@@ -36,6 +36,7 @@ class Dish(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     time_to_prepare = models.PositiveIntegerField(help_text='Time in minutes')
     is_vegetarian = models.BooleanField()
+    image = models.ImageField(upload_to='menus/dish', blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(null=True, blank=True)
 
