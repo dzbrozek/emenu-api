@@ -12,11 +12,10 @@ from emenuapi.celery import app
 
 
 def send_dish_report() -> bool:
-    now = timezone.now()
-    yesterday = now - datetime.timedelta(days=1)
+    yesterday = (timezone.now() - datetime.timedelta(days=1)).date()
 
-    new_dishes = Dish.objects.filter(created__gte=yesterday, created__lte=now)
-    updated_dishes = Dish.objects.filter(updated__gte=yesterday, updated__lte=now)
+    new_dishes = Dish.objects.filter(created__date=yesterday)
+    updated_dishes = Dish.objects.filter(updated__date=yesterday)
 
     if not new_dishes.exists() and not updated_dishes.exists():
         return False
