@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import cast
+
 from django.db import models
 from django.db.models import Count
 
 
 class MenuQuerySet(models.QuerySet):
     def with_num_dishes(self) -> models.QuerySet["Menu"]:
-        return super().annotate(num_dishes=Count('dishes'))
+        return cast(models.QuerySet["Menu"], super().prefetch_related('dishes').annotate(num_dishes=Count('dishes')))
 
 
 class Menu(models.Model):
