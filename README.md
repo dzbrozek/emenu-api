@@ -41,8 +41,7 @@ zmodyfikowanych przepisach
 9. Należy pamiętać o odpowiednich ustawieniach lokalizacyjnych oraz problemach związanych z optymalizacją liczby zapytań do bazy danych.
 10. Koniecznym jest wykorzystanie relacyjnego silnika bazodanowego (możliwe do uruchomienia na PostgreSQL bez ingerencji w kod, prócz konfiguracji)
 
-[![codecov](https://codecov.io/gh/dzbrozek/emenu-api/branch/master/graph/badge.svg)](https://codecov.io/gh/dzbrozek/emenu-api)
-
+[![codecov](https://codecov.io/gh/dzbrozek/emenu-api/branch/main/graph/badge.svg?token=kaAoBN2KHW)](https://codecov.io/gh/dzbrozek/emenu-api)
 
 ### Development
 
