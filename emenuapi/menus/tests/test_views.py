@@ -122,7 +122,7 @@ class ListMenuTest(APITestCase):
         DishFactory.create_batch(2, menu=self.first_menu)
         DishFactory(menu=self.second_menu)
 
-    def test_unauthenticated_user_cannot_list_non_empty_menus(self):
+    def test_unauthenticated_user_can_list_non_empty_menus(self):
         response = self.client.get(reverse('menus:menu-list'))
 
         self.assertEqual(response.status_code, 200)
