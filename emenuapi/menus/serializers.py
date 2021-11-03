@@ -9,8 +9,18 @@ from rest_framework import serializers
 class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
-        fields = ('id', 'name', 'description', 'price', 'time_to_prepare', 'is_vegetarian', 'created', 'updated')
-        read_only_fields = ('created', 'updated')
+        fields = (
+            'id',
+            'name',
+            'description',
+            'price',
+            'time_to_prepare',
+            'is_vegetarian',
+            'image',
+            'created',
+            'updated',
+        )
+        read_only_fields = ('created', 'updated', 'image')
 
     @transaction.atomic
     def create(self, validated_data: dict) -> Dish:

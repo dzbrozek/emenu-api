@@ -1,6 +1,7 @@
 from typing import cast
 
 from django.db import models, transaction
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
@@ -10,6 +11,8 @@ from menus.models import Dish, Menu
 from menus.serializers import DishSerializer, MenuDetailsSerializer, MenuSerializer
 from rest_framework import filters
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import action
+from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -149,6 +152,24 @@ class DishModelViewSet(ModelViewSet):
     )
     def destroy(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().destroy(request, *args, *kwargs)
+
+    @extend_schema(
+        description='Uploads a dish photo',
+    )
+    @transaction.atomic()
+    @action(detail=True, methods=['post'])
+    def photo(self, request, *args, **kwargs):
+        dish = self.get_object()
+        try:
+            image = request.data['file']
+            dish.image = image
+            dish.updated = timezone.now()
+            dish.save()
+            dish.menu.update_last_updated()
+        except KeyError:
+            raise ParseError('Request has no resource file attached')
+
+        return Response(DishSerializer(dish).data)
 
 
 @extend_schema(
