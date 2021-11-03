@@ -28,9 +28,7 @@ def send_dish_report() -> bool:
     if not emails:
         return False
 
-    message = render_to_string(
-        'emails/report_dishes_to_users.txt', {'new_dishes': new_dishes, 'updated_dishes': updated_dishes}
-    )
+    message = render_to_string('emails/dish_report.txt', {'new_dishes': new_dishes, 'updated_dishes': updated_dishes})
 
     return bool(
         send_mail(

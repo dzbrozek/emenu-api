@@ -11,7 +11,7 @@ from menus.models import Dish
 from menus.tasks import report_dishes, send_dish_report
 
 
-class ReportDishesTest(TestCase):
+class ReportDishesTaskTest(TestCase):
     def test_run_task(self):
         result = report_dishes.apply()
 
@@ -58,7 +58,7 @@ class SendDishReportTest(TestCase):
         self.assertEqual(
             email.body,
             render_to_string(
-                'emails/report_dishes_to_users.txt',
+                'emails/dish_report.txt',
                 {'new_dishes': Dish.objects.filter(pk=dish.pk), 'updated_dishes': Dish.objects.none()},
             ),
         )
@@ -83,7 +83,7 @@ class SendDishReportTest(TestCase):
         self.assertEqual(
             email.body,
             render_to_string(
-                'emails/report_dishes_to_users.txt',
+                'emails/dish_report.txt',
                 {'new_dishes': Dish.objects.none(), 'updated_dishes': Dish.objects.filter(pk=dish.pk)},
             ),
         )
