@@ -1,3 +1,5 @@
+import datetime
+
 import factory.fuzzy
 from django.contrib.auth.models import User
 from menus.models import Dish, Menu
@@ -22,6 +24,15 @@ class MenuFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Menu
+
+    @factory.post_generation
+    def created(self, create: bool, created: datetime.datetime, **kwargs: dict) -> None:
+        if not create:
+            return
+
+        if created:
+            self.created = created
+            self.save()
 
 
 class DishFactory(factory.django.DjangoModelFactory):

@@ -1,8 +1,14 @@
+from typing import cast
+
 from django.db import models, transaction
 from django.utils.functional import cached_property
-from drf_spectacular.utils import extend_schema
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from menus.filters import MenuFilter
 from menus.models import Dish, Menu
-from menus.serializers import DishSerializer, MenuSerializer
+from menus.serializers import DishSerializer, MenuDetailsSerializer, MenuSerializer
+from rest_framework import filters
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -11,15 +17,45 @@ from rest_framework.viewsets import ModelViewSet
 
 
 class MenuModelViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = MenuSerializer
     lookup_url_kwarg = 'menu_id'
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter, DjangoFilterBackend]
+    ordering_fields = ['name', 'num_dishes']
+    search_fields = ['name']
+    filterset_class = MenuFilter
 
-    def get_queryset(self) -> models.QuerySet[Menu]:
-        return Menu.objects.all().order_by('-created')
+    def get_queryset(self) -> models.QuerySet["Menu"]:
+        qs = cast(models.QuerySet["Menu"], Menu.objects.with_num_dishes().order_by('-created'))  # type: ignore
+        if self.request.user and self.request.user.is_authenticated:
+            return qs
+        return qs.filter(num_dishes__gt=0)
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return []
+        return [IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return MenuDetailsSerializer
+        return MenuSerializer
 
     @extend_schema(
         description='Returns list of menus',
+        parameters=[
+            OpenApiParameter(
+                name='ordering',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Order results',
+                enum=["name", "-name", "num_dishes", "-num_dishes"],
+            ),
+            OpenApiParameter(
+                name='search',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Filter results by name',
+            ),
+        ],
     )
     def list(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
         return super().list(request, *args, *kwargs)
@@ -62,7 +98,7 @@ class DishModelViewSet(ModelViewSet):
 
     @cached_property
     def menu(self) -> Menu:
-        return Menu.objects.get(pk=self.kwargs['menu_menu_id'])
+        return cast(Menu, Menu.objects.get(pk=self.kwargs['menu_menu_id']))
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()

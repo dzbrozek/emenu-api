@@ -34,6 +34,42 @@ paths:
     get:
       operationId: menus_list
       description: Returns list of menus
+      parameters:
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - -name
+          - -num_dishes
+          - name
+          - num_dishes
+        description: Order results
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Filter results by name
+      - in: query
+        name: updated_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: updated_before
+        schema:
+          type: string
+          format: date-time
       tags:
       - menus
       security:
@@ -93,7 +129,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Menu'
+                $ref: '#/components/schemas/MenuDetails'
           description: ''
     put:
       operationId: menus_update
@@ -541,7 +577,7 @@ components:
         updated:
           type: string
           format: date-time
-          nullable: true
+          readOnly: true
       required:
       - created
       - description
@@ -550,6 +586,7 @@ components:
       - name
       - price
       - time_to_prepare
+      - updated
     Menu:
       type: object
       properties:
@@ -568,10 +605,40 @@ components:
         updated:
           type: string
           format: date-time
+          readOnly: true
+      required:
+      - created
+      - description
+      - id
+      - name
+      - updated
+    MenuDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        dishes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dish'
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
           nullable: true
       required:
       - created
       - description
+      - dishes
       - id
       - name
     PatchedDish:
@@ -603,7 +670,7 @@ components:
         updated:
           type: string
           format: date-time
-          nullable: true
+          readOnly: true
     PatchedMenu:
       type: object
       properties:
@@ -622,7 +689,7 @@ components:
         updated:
           type: string
           format: date-time
-          nullable: true
+          readOnly: true
   securitySchemes:
     tokenAuth:
       type: apiKey
