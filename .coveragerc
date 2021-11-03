@@ -9,7 +9,6 @@ omit =
     */tests/test_*.py
     */settings/*
     */manage.py
-    */emenuapi/*
 
 [report]
 ignore_errors = True
