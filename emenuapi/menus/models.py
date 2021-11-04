@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import cast
 
 from django.db import models
@@ -36,6 +37,9 @@ class Dish(models.Model):
 
     class Meta:
         verbose_name_plural = 'Dishes'
+        constraints = [
+            models.CheckConstraint(check=models.Q(price__gt=Decimal('0')), name='dish_price_positive'),
+        ]
 
     def __str__(self) -> str:
         return f'Dish: {self.name}'
