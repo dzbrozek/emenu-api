@@ -4,7 +4,7 @@ import pytz
 from celery import states
 from django.core import mail
 from django.template.loader import render_to_string
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from freezegun import freeze_time
 from menus.factories import DishFactory, UserFactory
 from menus.models import Dish
@@ -19,13 +19,14 @@ class ReportDishesTaskTest(TestCase):
         self.assertEqual(result.get(), None)
 
 
+@override_settings(FROM_EMAIL='from@localhost')
 class SendDishReportTest(TestCase):
     def test_no_users(self):
         UserFactory(is_active=False, email='test@example.com')
         UserFactory(is_active=True, email='')
         DishFactory()
 
-        self.assertEqual(send_dish_report(), False)
+        self.assertEqual(send_dish_report(), 0)
 
         self.assertEqual(len(mail.outbox), 0)
 
@@ -36,22 +37,23 @@ class SendDishReportTest(TestCase):
             created=datetime.datetime(2021, 10, 1, tzinfo=pytz.UTC),
             updated=datetime.datetime(2021, 10, 2, tzinfo=pytz.UTC),
         )
-        self.assertEqual(send_dish_report(), False)
+        self.assertEqual(send_dish_report(), 0)
 
         self.assertEqual(len(mail.outbox), 0)
 
     @freeze_time("2021-10-4")
     def test_new_dishes(self):
         user = UserFactory(is_active=True)
+        UserFactory(is_active=True)
         DishFactory(
             created=datetime.datetime(2021, 10, 1, tzinfo=pytz.UTC),
         )
         dish = DishFactory(
             created=datetime.datetime(2021, 10, 3, 13, 30, tzinfo=pytz.UTC),
         )
-        self.assertEqual(send_dish_report(), True)
+        self.assertEqual(send_dish_report(), 2)
 
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
         email = mail.outbox[0]
         self.assertEqual(email.subject, 'Daily Dish Report')
         self.assertEqual(email.to, [user.email])
@@ -74,7 +76,7 @@ class SendDishReportTest(TestCase):
             created=datetime.datetime(2021, 10, 2, tzinfo=pytz.UTC),
             updated=datetime.datetime(2021, 10, 2, 12, 30, tzinfo=pytz.UTC),
         )
-        self.assertEqual(send_dish_report(), True)
+        self.assertEqual(send_dish_report(), 1)
 
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
