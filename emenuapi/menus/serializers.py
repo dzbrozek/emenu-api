@@ -1,3 +1,4 @@
+import decimal
 from typing import cast
 
 from django.utils import timezone
@@ -21,6 +22,11 @@ class DishSerializer(serializers.ModelSerializer):
             'updated',
         )
         read_only_fields = ('created', 'updated', 'image')
+
+    def validate_price(self, value: decimal.Decimal) -> decimal.Decimal:
+        if value <= 0:
+            raise serializers.ValidationError('Price must be positive.')
+        return value
 
     def update(self, instance: Dish, validated_data: dict) -> Dish:
         data = {**validated_data, 'updated': timezone.now()}
